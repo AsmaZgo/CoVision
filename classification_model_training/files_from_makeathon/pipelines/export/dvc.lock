@@ -1,0 +1,45 @@
+schema: '2.0'
+stages:
+  export:
+    cmd: python ../../export.py --single_model_path ../../models/model_best.pt --outdir
+      ../../models
+    deps:
+    - path: ../../export.py
+      hash: md5
+      md5: 7ac103807a6ff8f1927e64691cf913ff
+      size: 1467
+    - path: ../../models/model_best.pt
+      hash: md5
+      md5: 43b5c6b74a5b036831c4195bf8679e90
+      size: 31270857
+    params:
+      params.yaml:
+        base:
+          workdir: ../..
+        export:
+          outdir: models
+        train:
+          outdir: models
+    outs:
+    - path: ../../models/model_best.onnx
+      hash: md5
+      md5: 4f690b2bcf9e002238f4036414e8e0df
+      size: 30725959
+    - path: ../../models/model_best.pb
+      hash: md5
+      md5: dd63e7d159b54e8bfb79095e3a7a9a87.dir
+      size: 31578893
+      nfiles: 4
+  tensorflowjs:
+    cmd: tensorflowjs_converter --input_format=tf_saved_model --output_node_names=tfjs_layers_model
+      --saved_model_tags=serve ../../models/model_best.pb ../../../../covision-app/public/assets/classifier_model
+    deps:
+    - path: ../../models/model_best.pb
+      hash: md5
+      md5: dd63e7d159b54e8bfb79095e3a7a9a87.dir
+      size: 31578893
+      nfiles: 4
+    params:
+      params.yaml:
+        base:
+          workdir: ../..

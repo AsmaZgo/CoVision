@@ -8,23 +8,23 @@ const modelPromise = loadGraphModel(MODEL_URL);
 warmUp(modelPromise);
 
 export enum TestResult {
+  Pending = -3,
+  NotFound = -2,
   Unknown = -1,
-  Negative = 0,
-  Positive = 1,
+  Positive = 0,
+  Negative = 1,
   Empty = 2,
+  Invalid = 3,
 }
 
 function normalize(img: tf.Tensor4D, mean: number[], std: number[], axis: number) {
-  const centeredRgb = new Array(img.shape[axis]).fill(0).map((idx) =>
-    tf.gather(img, [idx], axis)
-      .sub(tf.scalar(mean[idx]))
-      .div(tf.scalar(std[idx])));
-
-  return tf.concat(centeredRgb, axis);
+  return img
+    .sub(tf.reshape(mean, [mean.length, 1, 1]))
+    .div(tf.reshape(std, [std.length, 1, 1]));
 }
 
 const runClassifierAnalysis = async (testArea: TestArea): Promise<TestResult> => {
-  if (!testArea.input_tf || !testArea.area) return TestResult.Unknown;
+  if (!testArea.input_tf || !testArea.area) return TestResult.NotFound;
   const model = await modelPromise;
 
   const input_tf = tf.tidy(() => {
